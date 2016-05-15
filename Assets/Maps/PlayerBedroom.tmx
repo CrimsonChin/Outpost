@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="32" tileheight="32" nextobjectid="1">
+ <tileset firstgid="1" name="ak&amp;#039;s_assets" tilewidth="32" tileheight="32" tilecount="504">
+  <image source="../Sprites/LPC/1/ak&amp;#039;s_assets.png" width="768" height="672"/>
+ </tileset>
+ <tileset firstgid="505" name="city_inside" tilewidth="32" tileheight="32" tilecount="384">
+  <image source="../Sprites/LPC/5/city_inside.png" width="768" height="512"/>
+ </tileset>
+ <tileset firstgid="889" name="32x32" tilewidth="32" tileheight="32" tilecount="1">
+  <image source="../Sprites/32x32.png" width="32" height="32"/>
+  <tile id="0">
+   <objectgroup draworder="index">
+    <object id="0" x="0" y="0.0625" width="31.9375" height="31.875"/>
+   </objectgroup>
+  </tile>
+ </tileset>
+ <layer name="Layout" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxbxMTAsIQAXgjEvUDMzcDAwIMD8wJxN1SdMpCtggOrIqmzBrJtcGBbJHXCBPBQUNcFxCVQXIokV4wk3gnEAJMuGgU=
+  </data>
+ </layer>
+ <layer name="Furniture" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAN0GFkYNBlJKzOBajGFU3dSyB+haYuBqgmFk0dI5DPRIQdkkA1UkjqngLxM8LaGP4C8T8i1IkCzRYjwh3EAACcywei
+  </data>
+ </layer>
+ <layer name="Furniture Obj" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFuEACE/3tBAAt9gBj
+  </data>
+ </layer>
+ <layer name="Collisions" width="10" height="10" opacity="0.8">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAuqGTGj5HV4TODWHXYzKZUPa3VofsPGQMAwPoRcQ==
+  </data>
+ </layer>
+</map>
