@@ -4,29 +4,29 @@ using System.Linq;
 
 public class SpawnScript : MonoBehaviour
 {
-    public GameObject enemy;             
-    public float spawnTime = 3f;
-    public float maxEnemies = 10f;
-    public Transform[] spawnPoints;
+    public GameObject Enemy;             
+    public float SpawnTime = 3f;
+    public float MaxEnemies = 10f;
+    public Transform[] SpawnPoints;
 
     void Start ()
     {
         Spawn();
-        InvokeRepeating("Spawn", spawnTime, spawnTime);
+        InvokeRepeating("Spawn", SpawnTime, SpawnTime);
     }
 	
 	void Spawn()
     {
-        if (GameObject.FindGameObjectsWithTag("Spider").Count() > maxEnemies)
+        if (GameObject.FindGameObjectsWithTag("Spider").Length > MaxEnemies)
         {
             return;
         }
 
-        int spawnPointIndex = Random.Range(0, spawnPoints.Length);
-        Transform spawnPoint = spawnPoints[spawnPointIndex];
+        int spawnPointIndex = Random.Range(0, SpawnPoints.Length);
+        Transform spawnPoint = SpawnPoints[spawnPointIndex];
         if (spawnPoint != null)
         {
-            Instantiate(enemy, spawnPoints[spawnPointIndex].position, Quaternion.identity);
+            Instantiate(Enemy, SpawnPoints[spawnPointIndex].position, Quaternion.identity);
         }
 
         if (CheckIfAllNestsDestroyed())
@@ -38,7 +38,7 @@ public class SpawnScript : MonoBehaviour
     private bool CheckIfAllNestsDestroyed()
     {
         bool isEmpty = true;
-        foreach (Transform transform in spawnPoints)
+        foreach (Transform transform in SpawnPoints)
         {
             if (transform != null)
             {

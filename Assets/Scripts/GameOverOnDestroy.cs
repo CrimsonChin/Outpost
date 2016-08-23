@@ -2,11 +2,11 @@
 
 public class GameOverOnDestroy : MonoBehaviour
 {
-    private bool isShuttingDown = false;
+    private bool _isShuttingDown = false;
 
     void OnDestroy()
     {
-        if (!isShuttingDown && !Application.isLoadingLevel)
+        if (!_isShuttingDown && !Application.isLoadingLevel)
         {
             // Terrible to use a string!
             Application.LoadLevel("Title");
@@ -15,6 +15,6 @@ public class GameOverOnDestroy : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        isShuttingDown = true;
+        _isShuttingDown = true;
     }
 }

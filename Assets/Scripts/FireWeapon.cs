@@ -3,46 +3,45 @@
 
 public class FireWeapon : MonoBehaviour
 {
-    private bool hasWeaponEquipped = false;
-    private bool canFire = true;
+    private bool _hasWeaponEquipped;
+    private bool _canFire = true;
 
-    public float fireDelayCounter = 0;
+    public float FireDelayCounter;
 
-    private Movement playerMovement;
+    private Movement _playerMovement;
 
     private float _weaponSpeed;
     private GameObject _weaponPrefab;
     private float _weaponDamage;
     private float _weaponFireDelay;
 
-    // Use this for initialization
-    void Start () {
-        playerMovement = GetComponent<Movement>();
-	}
-	
-	// Update is called once per frame
-	void Update ()
+    void Start()
     {
-        if (Input.GetAxis("Fire1") > 0 && hasWeaponEquipped && canFire)
+        _playerMovement = GetComponent<Movement>();
+    }
+
+    void Update()
+    {
+        if (Input.GetAxis("Fire1") > 0 && _hasWeaponEquipped && _canFire)
         {
-            FireBullet(playerMovement.FacingDirection);
+            FireBullet(_playerMovement.FacingDirection);
         }
 
-        if (fireDelayCounter > 0)
+        if (FireDelayCounter > 0)
         {
-            fireDelayCounter--;
+            FireDelayCounter--;
         }
         else
         {
-            canFire = true;
+            _canFire = true;
         }
     }
 
     public void EquipWeapon(WeaponLootItemScript weapon)
     {
-        hasWeaponEquipped = true;
+        _hasWeaponEquipped = true;
 
-        // SET THE PROPERTIES THE ITEM IS ABOUT TO BE DESTROYED
+        // SET THE PROPERTIES THE WEAPON IS ABOUT TO BE DESTROYED
         _weaponSpeed = weapon.Speed;
         _weaponPrefab = weapon.BulletPrefab;
         _weaponDamage = weapon.Damage;
@@ -52,14 +51,14 @@ public class FireWeapon : MonoBehaviour
     void FireBullet(Vector2 direction)
     {
         direction.Scale(new Vector2(_weaponSpeed, _weaponSpeed));
-    
+
         Vector3 bulletPosition = gameObject.transform.position;
         bulletPosition.x += direction.x * 0.07f;
         bulletPosition.y += direction.y * 0.07f;
         GameObject bulletInstance = (GameObject)Instantiate(_weaponPrefab, bulletPosition, Quaternion.identity);
         bulletInstance.GetComponent<BulletScript>().Setup(direction, _weaponDamage);
 
-        canFire = false;
-        fireDelayCounter = _weaponFireDelay;
+        _canFire = false;
+        FireDelayCounter = _weaponFireDelay;
     }
 }

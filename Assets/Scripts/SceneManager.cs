@@ -4,13 +4,13 @@ public class SceneManager : MonoBehaviour
 {
     public void LoadLevel(string levelName)
     {
-        Application.LoadLevel(levelName);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(levelName);
     }
 
 	public void LoadLevelByIndex(int index)
 	{
-		Application.LoadLevel(index);
-	}
+        UnityEngine.SceneManagement.SceneManager.LoadScene(index);
+    }
 
     public void Quit()
     {

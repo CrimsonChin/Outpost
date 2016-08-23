@@ -4,84 +4,79 @@ using System;
 
 public class SpiderAI : MonoBehaviour
 {
-    public float sightDistance = 3f;
+    public float SightDistance = 3f;
 
-    public Transform player;
+    public Transform Player;
 
-    public SpiderState state;
+    public SpiderState State;
 
-    public float timeLooking = 6f;
-    public float timeSpentLooking = 0;
-    public float lookTimeInDirection = 1.5f;
-    public float timeSpentLookingInDirection = 0;
+    public float TimeLooking = 6f;
+    public float TimeSpentLooking;
+    public float LookTimeInDirection = 1.5f;
+    public float TimeSpentLookingInDirection;
 
-    public float spideySenseRange = 0.75f;
+    public float SpideySenseRange = 0.75f;
 
-    private Vector2 lookDirection;
-    private Animator anim;
+    private Vector2 _lookDirection;
+    private Animator _animator;
 
-    public float followSpeed = 0.02f;
+    public float FollowSpeed = 0.02f;
 
-    public Vector2 roamingTarget = Vector2.zero;
-    public Vector2 playerLastSightedLocation = Vector2.zero;
+    public Vector2 RoamingTarget = Vector2.zero;
+    public Vector2 PlayerLastSightedLocation = Vector2.zero;
 
-    private Color debugColor = Color.green;
+    private Color _debugColor = Color.green;
 
-    private float attackTime;
+    private float _attackTime;
 
     public AudioClip[] OnDestroySounds;
-    private bool _isShuttingDown = false;
 
-    void Start()
+    private bool _isShuttingDown;
+
+    public void Start()
     {
-        anim = GetComponent<Animator>();
+        _animator = GetComponent<Animator>();
 
-        player = GameObject.Find("Player").transform;
+        Player = GameObject.Find("Player").transform;
 
         DecideState();
     }
 
-    void Update()
+    public void Update()
     {
-        switch (state)
+        switch (State)
         {
             case SpiderState.Wait:
-                debugColor = Color.green;
+                _debugColor = Color.green;
                 Wait();
                 break;
             case SpiderState.Alert:
-                debugColor = Color.yellow;
+                _debugColor = Color.yellow;
                 Alert();
                 break;
             case SpiderState.Pursue:
-                debugColor = Color.red;
+                _debugColor = Color.red;
                 Persue();
                 break;
             case SpiderState.Attack:
-                debugColor = Color.red;
+                _debugColor = Color.red;
                 Attack();
                 break;
             default: //EnemyState.Roam
-                debugColor = Color.green;
+                _debugColor = Color.green;
                 Roam();
                 break;
         }
     }
- 
+
     private void NewRoam()
     {
-        lookDirection = GetRandomDirection();
+        _lookDirection = GetRandomDirection();
         SetAnimator();
 
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, lookDirection);
-        if (!hit)
-        {
-            NewRoam();
-        }
-        else
-        {
-            roamingTarget = hit.point;
-        }
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, _lookDirection);
+
+        RoamingTarget = hit.point;
     }
 
     private void Roam()
@@ -92,7 +87,7 @@ public class SpiderAI : MonoBehaviour
         CanSensePlayer();
 
         // have we reached our destination?
-        if (roamingTarget == Vector2.zero || Vector2.Distance(transform.position, roamingTarget) < 0.5)
+        if (RoamingTarget == Vector2.zero || Vector2.Distance(transform.position, RoamingTarget) < 0.5)
         {
             NewRoam();
             return;
@@ -104,26 +99,26 @@ public class SpiderAI : MonoBehaviour
         bool isPlayerVisible = LookForPlayer();
         if (isPlayerVisible)
         {
-            playerLastSightedLocation = player.transform.position;
-            state = SpiderState.Pursue;
+            PlayerLastSightedLocation = Player.transform.position;
+            State = SpiderState.Pursue;
             return;
         }
-        
-        transform.position = Vector3.MoveTowards(transform.position, roamingTarget, followSpeed);
+
+        transform.position = Vector3.MoveTowards(transform.position, RoamingTarget, FollowSpeed);
     }
 
     private void NewLookDirection()
     {
         Vector2 newDirection = GetRandomDirection();
-        
-        if (newDirection == lookDirection)
+
+        if (newDirection == _lookDirection)
         {
             NewLookDirection();
         }
 
-        lookDirection = GetRandomDirection();
+        _lookDirection = GetRandomDirection();
 
-        timeSpentLookingInDirection = lookTimeInDirection;
+        TimeSpentLookingInDirection = LookTimeInDirection;
 
         SetAnimator();
     }
@@ -160,19 +155,19 @@ public class SpiderAI : MonoBehaviour
         CanSensePlayer();
 
         // how long have we spent looking?
-        // if we cants ee the enemy after x mins giveup
-        timeSpentLooking -= Time.deltaTime;
-        if (timeSpentLooking <= 0)
+        // if we cant see the enemy after x mins giveup
+        TimeSpentLooking -= Time.deltaTime;
+        if (TimeSpentLooking <= 0)
         {
             // Pick a new roaming direction and go there
-            state = SpiderState.Roam;
+            State = SpiderState.Roam;
             NewRoam();
         }
 
         // change the direction we're looking in
-        if (timeSpentLookingInDirection >= 0)
+        if (TimeSpentLookingInDirection >= 0)
         {
-            timeSpentLookingInDirection -= Time.deltaTime;
+            TimeSpentLookingInDirection -= Time.deltaTime;
         }
         else
         {
@@ -183,40 +178,39 @@ public class SpiderAI : MonoBehaviour
         bool isPlayerVisible = LookForPlayer();
         if (isPlayerVisible)
         {
-            playerLastSightedLocation = player.transform.position;
-            state = SpiderState.Pursue;
-            return;
+            PlayerLastSightedLocation = Player.transform.position;
+            State = SpiderState.Pursue;
         }
     }
 
     private void Attack()
     {
-        if (player == null)
+        if (Player == null)
         {
-            anim.SetBool("isAttacking", false);
+            _animator.SetBool("isAttacking", false);
             DecideState();
         }
 
-        if (attackTime <= 0)
+        if (_attackTime <= 0)
         {
             DamagePlayer();
-            attackTime += 30;
+            _attackTime += 30;
         }
         else
         {
-            attackTime--;
+            _attackTime--;
         }
     }
 
     private void DamagePlayer()
     {
-        Destroyable destroyablePlayer = player.GetComponent<Destroyable>();
+        Destroyable destroyablePlayer = Player.GetComponent<Destroyable>();
         if (destroyablePlayer != null)
         {
             destroyablePlayer.Damage(1);
         }
 
-        if (player == null)
+        if (Player == null)
         {
             DecideState();
         }
@@ -224,30 +218,30 @@ public class SpiderAI : MonoBehaviour
 
     private void Persue()
     {
-         bool isPlayerVisible = LookForPlayer();
+        bool isPlayerVisible = LookForPlayer();
         if (isPlayerVisible)
         {
-            playerLastSightedLocation = player.transform.position;
+            PlayerLastSightedLocation = Player.transform.position;
         }
 
-        Vector2 distance = transform.position - player.transform.position;
+        Vector2 distance = transform.position - Player.transform.position;
         if (Mathf.Abs(distance.x) > Mathf.Abs(distance.y))
         {
-            lookDirection = distance.x > 0 ? Vector2.left : Vector2.right;
+            _lookDirection = distance.x > 0 ? Vector2.left : Vector2.right;
         }
         else
         {
-            lookDirection = distance.y > 0 ? Vector2.down : Vector2.up;
+            _lookDirection = distance.y > 0 ? Vector2.down : Vector2.up;
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, playerLastSightedLocation, followSpeed * 2f);
+        transform.position = Vector3.MoveTowards(transform.position, PlayerLastSightedLocation, FollowSpeed * 2f);
         SetAnimator();
 
         // Arrived at target but the player isn't there!
-        if (Vector2.Distance(transform.position, playerLastSightedLocation) <= 0)
+        if (Vector2.Distance(transform.position, PlayerLastSightedLocation) <= 0)
         {
-            timeSpentLooking = timeLooking;
-            state = SpiderState.Alert;
+            TimeSpentLooking = TimeLooking;
+            State = SpiderState.Alert;
             return;
         }
 
@@ -258,66 +252,63 @@ public class SpiderAI : MonoBehaviour
     {
     }
 
-    void OnCollisionEnter2D(Collision2D other)
+    public void OnCollisionEnter2D(Collision2D other)
     {
         if (other.gameObject.tag == "Player")
         {
-            anim.SetBool("isAttacking", true);
-            state = SpiderState.Attack;
+            _animator.SetBool("isAttacking", true);
+            State = SpiderState.Attack;
         }
     }
 
-    void OnCollisionExit2D(Collision2D other)
+    public void OnCollisionExit2D(Collision2D other)
     {
         if (other.gameObject.tag == "Player")
         {
-            anim.SetBool("isAttacking", false);
+            _animator.SetBool("isAttacking", false);
             DecideState();
         }
     }
 
-    void OnDrawGizmos()
+    public void OnDrawGizmos()
     {
-        Gizmos.color = debugColor;
-        Gizmos.DrawWireSphere(transform.position, spideySenseRange);
+        Gizmos.color = _debugColor;
+        Gizmos.DrawWireSphere(transform.position, SpideySenseRange);
     }
 
     private void DecideState()
     {
-        state = SpiderState.Roam;
+        State = SpiderState.Roam;
     }
 
-    private void LookAtPlayer()
-    {
-        float x = player.transform.position.x - transform.position.x;
-        float y = player.transform.position.y - transform.position.y;
-
-        lookDirection = new Vector2(x, y);
-        SetAnimator();
-    }
 
     private bool LookForPlayer()
     {
-        if (player == null)
+        if (Player == null)
         {
             return false;
         }
-        Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, 15) * lookDirection) * (sightDistance - 2), debugColor);
-        Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, -15) * lookDirection) * (sightDistance - 2), debugColor);
-        Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, 10) * lookDirection) * (sightDistance - 1), debugColor);
-        Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, -10) * lookDirection) * (sightDistance - 1), debugColor);
-        Debug.DrawRay(transform.position, lookDirection * sightDistance, debugColor);
+
+        /*
+        Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, 15) * _lookDirection) * (SightDistance - 2), _debugColor);
+        Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, -15) * _lookDirection) * (SightDistance - 2), _debugColor);
+        Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, 10) * _lookDirection) * (SightDistance - 1), _debugColor);
+        Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, -10) * _lookDirection) * (SightDistance - 1), _debugColor);
+        Debug.DrawRay(transform.position, _lookDirection * SightDistance, _debugColor);
+        */
+        Debug.DrawRay(transform.position, _lookDirection * SightDistance, _debugColor);
 
         // could use a circle cast?
-        RaycastHit2D hitCentre = Physics2D.Raycast(transform.position, lookDirection, sightDistance);
-        RaycastHit2D hitLeft20 = Physics2D.Raycast(transform.position, Quaternion.Euler(0, 0, 15) * lookDirection, sightDistance - 1);
-        RaycastHit2D hitRight20 = Physics2D.Raycast(transform.position, Quaternion.Euler(0, 0, -15) * lookDirection, sightDistance - 1);
-        RaycastHit2D hitLeft45 = Physics2D.Raycast(transform.position, Quaternion.Euler(0, 0, 10) * lookDirection, sightDistance - 2);
-        RaycastHit2D hitRight45 = Physics2D.Raycast(transform.position, Quaternion.Euler(0, 0, -10) * lookDirection, sightDistance - 2);
+        RaycastHit2D hitCentre = Physics2D.Raycast(transform.position, _lookDirection, SightDistance);
 
-        IList<RaycastHit2D> hits = new List<RaycastHit2D>
-        {
-            hitCentre, hitLeft20, hitRight20, hitLeft45, hitRight45
+        /*
+        RaycastHit2D hitLeft20 = Physics2D.Raycast(transform.position, Quaternion.Euler(0, 0, 15) * _lookDirection, SightDistance - 1);
+        RaycastHit2D hitRight20 = Physics2D.Raycast(transform.position, Quaternion.Euler(0, 0, -15) * _lookDirection, SightDistance - 1);
+        RaycastHit2D hitLeft45 = Physics2D.Raycast(transform.position, Quaternion.Euler(0, 0, 10) * _lookDirection, SightDistance - 2);
+        RaycastHit2D hitRight45 = Physics2D.Raycast(transform.position, Quaternion.Euler(0, 0, -10) * _lookDirection, SightDistance - 2);
+        */
+        RaycastHit2D[] hits = {
+            hitCentre //, hitLeft20, hitRight20, hitLeft45, hitRight45
         };
 
         return ContainsPlayerHit(hits);
@@ -338,43 +329,42 @@ public class SpiderAI : MonoBehaviour
 
     private bool HitPlayer(RaycastHit2D hit)
     {
-        return hit && hit.transform == player.transform;
+        return hit && hit.transform == Player.transform;
     }
 
     private void SetAnimator()
     {
-        if (anim == null)
+        if (_animator == null)
         {
             return;
         }
-        anim.SetFloat("inputX", lookDirection.x);
-        anim.SetFloat("inputY", lookDirection.y);
+        _animator.SetFloat("inputX", _lookDirection.x);
+        _animator.SetFloat("inputY", _lookDirection.y);
     }
 
     private void CanSensePlayer()
     {
         // Can sense player
-        if (player == null)
+        if (Player == null)
         {
             return;
         }
 
-        if (Vector2.Distance(transform.position, player.transform.position) < spideySenseRange)
+        if (Vector2.Distance(transform.position, Player.transform.position) < SpideySenseRange)
         {
-            state = SpiderState.Pursue;
-            return;
+            State = SpiderState.Pursue;
         }
     }
 
-    void OnDestroy()
+    public void OnDestroy()
     {
-        if (_isShuttingDown = !Application.isLoadingLevel)
+        if (!_isShuttingDown)
         {
             AudioManager.Instance.PlayRandomSound(OnDestroySounds);
-        }        
+        }
     }
 
-    void OnApplicationQuit()
+    public void OnApplicationQuit()
     {
         _isShuttingDown = true;
     }

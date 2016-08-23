@@ -2,28 +2,29 @@
 
 public class Destroyable : MonoBehaviour
 {
-    public float toughness = 2f;
+    public float Toughness = 2f;
 
-    public float health;
-    
+    public float Health;
+    private HealthBar _healthBar;
+
     void Start()
     {
-        health = toughness;
+        _healthBar = GetComponent<HealthBar>();
+        Health = Toughness;
     }
 
-	public void Damage(float damage)
+    public void Damage(float damage)
     {
-        health -= damage;
+        Health -= damage;
 
-        if (health <= 0)
+        if (Health <= 0)
         {
             Destroy(gameObject);
         }
-
-        HealthBar healthBar = GetComponent<HealthBar>();
-        if (healthBar != null)
+        
+        if (_healthBar != null)
         {
-            healthBar.SetHealth(Mathf.Clamp(health / toughness, 0, 1));
+            _healthBar.SetHealth(Mathf.Clamp(Health / Toughness, 0, 1));
         }
     }
 }

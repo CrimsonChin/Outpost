@@ -2,8 +2,6 @@
 
 public class BulletScript : MonoBehaviour
 {
-    private Vector2 speed;
-
     private float _damage = 2f;
 
     public AudioClip OnDestroySound;

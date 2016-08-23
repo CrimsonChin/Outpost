@@ -4,14 +4,14 @@ using System.Linq;
 [RequireComponent(typeof(AudioSource))]
 public class PlaySoundOnDestroy : MonoBehaviour
 {
-    public AudioClip[] audioClips;
+    public AudioClip[] AudioClips;
 
     void OnDestroy()
     {
         Debug.Log(gameObject.name);
-        if (audioClips != null && audioClips.Any())
+        if (AudioClips != null && AudioClips.Any())
         {
-            AudioClip clip = audioClips[Random.Range(0, audioClips.Length - 1)];
+            AudioClip clip = AudioClips[Random.Range(0, AudioClips.Length - 1)];
             AudioSource.PlayClipAtPoint(clip, Vector2.zero);
         }
     }

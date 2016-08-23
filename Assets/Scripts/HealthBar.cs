@@ -2,12 +2,12 @@
 
 public class HealthBar : MonoBehaviour
 {
-    public SpriteRenderer healthDisplay;
-    public Sprite[] healthSprites;
+    public SpriteRenderer HealthDisplay;
+    public Sprite[] HealthSprites;
 
     public void SetHealth(float health)
     {
-        int spriteIndex = (int)(Mathf.Floor((healthSprites.Length - 1) * health));
-        healthDisplay.sprite = healthSprites[spriteIndex];
+        int spriteIndex = (int)(Mathf.Floor((HealthSprites.Length - 1) * health));
+        HealthDisplay.sprite = HealthSprites[spriteIndex];
     }
 }

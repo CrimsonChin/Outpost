@@ -5,32 +5,32 @@ public class SpiderController : MonoBehaviour
 {
     #region Fields
 
-    public GameObject player;
+    public GameObject Player;
 
     public float Speed = 0.02f;
 
     private FiniteStateMachine _fsm;
-    private Animator _anim;
+    private Animator _animator;
 
     #endregion
 
     // Use this for initialization
-    void Start ()
+    public void Start ()
     {
-        _anim = GetComponent<Animator>();
+        _animator = GetComponent<Animator>();
         SetupStateMachine();
 	}
 
     // Update is called once per frame
-    void Update ()
+    public void Update ()
     {
-        _fsm.CurrentState.Asses(gameObject, player);
-        _fsm.CurrentState.Act(gameObject, player);
+        _fsm.CurrentState.Asses(gameObject, Player);
+        _fsm.CurrentState.Act(gameObject, Player);
 	}
 
     private void SetupStateMachine()
     {
-        State roam = new SpiderRoamState(this, _anim);
+        State roam = new SpiderRoamState(this, _animator);
         roam.AddTransition(Transition.PlayerSighted, StateId.Persue);
 
         _fsm = new FiniteStateMachine();

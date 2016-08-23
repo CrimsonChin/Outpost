@@ -1,56 +1,49 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
+using UnityEngine;
 
 public class Movement : MonoBehaviour 
 {
-    public float speed = 1.5f;
+    public float Speed = 1.5f;
 	private Rigidbody2D _rigidbody;
-	private Animator _anim;
+	private Animator _animator;
 
     public Vector2 FacingDirection = Vector2.up;
 
-	void Start () 
+    public void Start () 
 	{
 		_rigidbody = GetComponent<Rigidbody2D> ();
-		_anim = GetComponent<Animator>();
+		_animator = GetComponent<Animator>();
     }
-	
-	void Update () 
+
+    public void Update () 
 	{
-        Vector2 movementVector = GetMovementVector();
+        var movementVector = GetMovementVector();
 
         if (movementVector != Vector2.zero)
 		{
             FacingDirection = movementVector;
 
-            _anim.SetBool("isWalking", true);
-			_anim.SetFloat("inputX", movementVector.x);
-			_anim.SetFloat("inputY", movementVector.y);
+            _animator.SetBool("isWalking", true);
+			_animator.SetFloat("inputX", movementVector.x);
+			_animator.SetFloat("inputY", movementVector.y);
 		}
 		else 
 		{
-			_anim.SetBool("isWalking", false);
+			_animator.SetBool("isWalking", false);
 		}
 
-		_rigidbody.MovePosition(_rigidbody.position + movementVector * Time.deltaTime * speed);
+		_rigidbody.MovePosition(_rigidbody.position + movementVector * Time.deltaTime * Speed);
 	}
 
-    private Vector2 GetMovementVector()
+    private static Vector2 GetMovementVector()
     {
-        Vector2 movementVector = Vector2.zero;
-
-        float x = Input.GetAxisRaw("Horizontal");
-        float y = Input.GetAxisRaw("Vertical");
-
-        if (x != 0)
+        var x = Input.GetAxisRaw("Horizontal");
+        if (Math.Abs(x) > 0)
         {
-            movementVector = new Vector2(x, 0);
-        }
-        else if (y != 0)
-        {
-            movementVector = new Vector2(0, y);
+            return new Vector2(x, 0);
         }
 
-        return movementVector;
+        var y = Input.GetAxisRaw("Vertical");
+        return Math.Abs(y) > 0 ? new Vector2(0, y) : Vector2.zero;
     }
 }

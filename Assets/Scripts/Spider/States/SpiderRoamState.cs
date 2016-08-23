@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 
 class SpiderRoamState : State
 {
-    Vector2 _roamTarget;
-    private SpiderController _controller;
-    private Animator _anim;
+    private Vector2 _roamTarget;
+    private readonly SpiderController _controller;
+    private readonly Animator _animator;
 
     public SpiderRoamState(SpiderController controller, Animator animator)
     {
         _roamTarget = Vector2.zero;
         _controller = controller;
-        _anim = animator;
+        _animator = animator;
     }
 
     public override StateId StateId
@@ -28,10 +24,10 @@ class SpiderRoamState : State
 
     private void NewRoam(GameObject self)
     {
-        Vector2 newPosition = UnityEngine.Random.insideUnitCircle * 10;
+        Vector2 newPosition = Random.insideUnitCircle * 10;
 
         Debug.DrawLine(self.transform.position, newPosition, Color.black);
-        RaycastHit2D hit = Physics2D.Linecast(self.transform.position, new Vector2(newPosition.x, newPosition.y));
+        RaycastHit2D hit = Physics2D.Linecast(self.transform.position, newPosition);
         if (!hit)
         {
             NewRoam(self);
@@ -44,8 +40,8 @@ class SpiderRoamState : State
 
     private void SetAnimator()
     {
-        _anim.SetFloat("inputX", _roamTarget.x);
-        _anim.SetFloat("inputY", _roamTarget.y);
+        _animator.SetFloat("inputX", _roamTarget.x);
+        _animator.SetFloat("inputY", _roamTarget.y);
     }
 
     public override void Act(GameObject self, GameObject player)

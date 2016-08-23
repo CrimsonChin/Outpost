@@ -2,46 +2,45 @@
 
 public class AudioManager : MonoBehaviour 
 {
-    public AudioSource musicSource;
-    public AudioSource sfxSource;
+    public AudioSource MusicSource;
+    public AudioSource SfxSource;
 
-    public float lowPitchRange = .95f;
-    public float highPitchRange = 1.05f;
+    public float LowPitchRange = .95f;
+    public float HighPitchRange = 1.05f;
 
-	private static AudioManager instance = null;
+    static AudioManager()
+    {
+        Instance = null;
+    }
 
-	public static AudioManager Instance 
+    public static AudioManager Instance { get; private set; }
+
+    public void Awake() 
 	{
-		get { return instance; }
-	}
-
-	void Awake() 
-	{
-		if (instance != null && instance != this) 
+		if (Instance != null && Instance != this) 
 		{
 			Destroy(gameObject);
-			return;
 		}
 		else 
 		{
 			DontDestroyOnLoad(gameObject);
-			instance = this;
+			Instance = this;
 		}
     }
 	
 	public void PlaySound(AudioClip clip)
     { 
-		sfxSource.clip = clip;
-        sfxSource.Play();
+		SfxSource.clip = clip;
+        SfxSource.Play();
 	}
 
     public void PlayRandomSound(AudioClip[] audioClips)
     {
         int randomIndex = Random.Range(0, audioClips.Length);
-        float randomPitch = Random.Range(lowPitchRange, highPitchRange);
+        float randomPitch = Random.Range(LowPitchRange, HighPitchRange);
 
-        sfxSource.pitch = randomPitch;
-        sfxSource.clip = audioClips[randomIndex];
-        sfxSource.Play();        
+        SfxSource.pitch = randomPitch;
+        SfxSource.clip = audioClips[randomIndex];
+        SfxSource.Play();        
     }
 }
