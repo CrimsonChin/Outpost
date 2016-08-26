@@ -26,6 +26,14 @@ class FiniteStateMachine
 
     #region Methods
 
+    public void AddStates(IEnumerable<State> states)
+    {
+        foreach (var state in states)
+        {
+            AddState(state);
+        }
+    }
+
     public void AddState(State state)
     {
         if (_states.Contains(state))

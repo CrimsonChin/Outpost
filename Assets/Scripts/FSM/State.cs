@@ -71,7 +71,7 @@ abstract class State
 
     #region Abstract Methods 
 
-    public abstract void Asses(GameObject self, GameObject player);
+    public abstract void Reason(GameObject self, GameObject player);
 
     public abstract void Act(GameObject self, GameObject player);
 

@@ -1,75 +1,72 @@
 ﻿using UnityEngine;
 
-
 class SpiderRoamState : State
 {
     private Vector2 _roamTarget;
     private readonly SpiderController _controller;
-    private readonly Animator _animator;
+    private const float RoamSpeed = 0.01f;
 
-    public SpiderRoamState(SpiderController controller, Animator animator)
+    public SpiderRoamState(SpiderController controller)
     {
         _roamTarget = Vector2.zero;
         _controller = controller;
-        _animator = animator;
+
+        AddTransition(Transition.CanSensePlayer, StateId.PersuePlayer);
+
+        AddTransition(Transition.PlayerSighted, StateId.PersuePlayer);
+
+        // set externally
+        //AddTransition(Transition.CollidedWithPlayer, StateId.Attack);
     }
 
     public override StateId StateId
     {
-        get
+        get { return StateId.Roam; }
+    }
+
+    public override void DoBeforeEnter()
+    {
+        _roamTarget = Vector2.zero;
+    }
+
+    public override void Act(GameObject self, GameObject player)
+    {
+        if (_roamTarget == Vector2.zero || Vector2.Distance(self.transform.position, _roamTarget) < 0.5)
         {
-            return StateId.Roam;
+            NewRoam(self);
+        }
+
+        self.transform.position = Vector3.MoveTowards(self.transform.position, _roamTarget, RoamSpeed);
+    }
+
+    public override void Reason(GameObject self, GameObject player)
+    {
+        if (_controller.CanSensePlayer())
+        {
+            Debug.Log("Spider: I can sense the player");
+            _controller.PerformTransition(Transition.CanSensePlayer);
+            return;
+        }
+
+        if (_controller.CheckIfPlayerIsVisible())
+        {
+            Debug.Log("Spider: I can see the player");
+            _controller.PerformTransition(Transition.PlayerSighted);
+            return;
         }
     }
 
     private void NewRoam(GameObject self)
     {
-        Vector2 newPosition = Random.insideUnitCircle * 10;
+        // TODO get a new direction
+        // raycast in that direction
+        // change look direction
+        // move
+        _controller.ChangeLookDirection();
 
-        Debug.DrawLine(self.transform.position, newPosition, Color.black);
-        RaycastHit2D hit = Physics2D.Linecast(self.transform.position, newPosition);
-        if (!hit)
-        {
-            NewRoam(self);
-        }
-        else
-        {
-            _roamTarget = hit.point;
-        }
-    }
+        var hit = Physics2D.Raycast(self.transform.position, _controller.LookDirection);
 
-    private void SetAnimator()
-    {
-        _animator.SetFloat("inputX", _roamTarget.x);
-        _animator.SetFloat("inputY", _roamTarget.y);
-    }
-
-    public override void Act(GameObject self, GameObject player)
-    {
-        Debug.DrawLine(self.transform.position, _roamTarget);
-        if (_roamTarget == Vector2.zero || Vector2.Distance(self.transform.position, _roamTarget) < 1)
-        {
-            NewRoam(self);
-            return;
-        }
-
-        SetAnimator();
-        self.transform.position = Vector3.MoveTowards(self.transform.position, _roamTarget, _controller.Speed);
-
-        ////RaycastHit2D hit = LookAhead();
-        //// if (IsEnemyInLineOfSight(hit))
-        //// {
-        ////     isEnemySighted = true;
-        //// }
-    }
-
-    public override void Asses(GameObject self, GameObject player)
-    {
-        if (Vector2.Distance(self.transform.position, player.transform.position) < 1.5)
-        {
-            _controller.SetTransition(Transition.SensePlayer);
-            return;
-        }
+        _roamTarget = hit.point;
     }
 }
 

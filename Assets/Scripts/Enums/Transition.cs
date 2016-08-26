@@ -1,6 +1,8 @@
 ﻿public enum Transition
 {
     NullTransition,
-    SensePlayer,
-    PlayerSighted
+    CanSensePlayer,
+    PlayerSighted,
+    PlayerEscaped,
+    CollidedWithPlayer
 }

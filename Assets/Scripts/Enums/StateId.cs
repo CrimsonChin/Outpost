@@ -6,7 +6,9 @@
 
     Roam,
 
-    Persue,
+    PersuePlayer,
 
     Attack,
+
+    Alert
 }
