@@ -13,6 +13,7 @@ namespace Assets.Scripts.Spider.States
             _spiderController = spiderController;
 
             AddTransition(Transition.PlayerEscaped, StateId.Alert);
+            AddTransition(Transition.CollidedWithPlayer, StateId.Attack);
         }
 
         public override StateId StateId
@@ -22,15 +23,12 @@ namespace Assets.Scripts.Spider.States
 
         public override void Reason(GameObject self, GameObject player)
         {
-            // Arrived at target but the player isn't there!
             if (Vector2.Distance(self.transform.position, _playerLastSightedLocation) <= 0)
             {
                 Debug.Log("Spider Persue: The Player has escaped!");
                 _spiderController.PerformTransition(Transition.PlayerEscaped);
                 return;
             }
-
-            // Attack
         }
 
         public override void Act(GameObject self, GameObject player)
@@ -51,6 +49,15 @@ namespace Assets.Scripts.Spider.States
             }
 
             self.transform.position = Vector3.MoveTowards(self.transform.position, _playerLastSightedLocation, PersueSpeed);
+        }
+
+        public override void OnCollisionEnter2D(Collision2D other)
+        {
+            if (other.gameObject.tag == "Player")
+            {
+                Debug.Log("Spider Persue: Collided with player");
+                _spiderController.PerformTransition(Transition.CollidedWithPlayer);
+            }
         }
     }
 }

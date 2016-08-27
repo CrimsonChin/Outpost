@@ -13,7 +13,6 @@ namespace Assets.Scripts.Spider.States
             _spiderController = spiderController;
             _animator = animator;
 
-            // Set externally
             AddTransition(Transition.PlayerEscaped, StateId.Alert);
         }
 
@@ -24,22 +23,20 @@ namespace Assets.Scripts.Spider.States
 
         public override void DoBeforeEnter()
         {
-            // face player
             _animator.SetBool("isAttacking", true);
         }
 
         public override void Reason(GameObject self, GameObject player)
         {
+            // its important to continue casting here otherwise oncollisionexit fires
+            if (_spiderController.CheckIfPlayerIsVisible())
+            {
+                _spiderController.PerformTransition(Transition.PlayerEscaped);
+            }
+
             // Edge case, player is dead? who knows
             if (player == null)
             {
-                _spiderController.PerformTransition(Transition.PlayerEscaped);
-                return;
-            }
-
-            if (!_spiderController.IsPlayerWithinAttackingDistance())
-            {
-                Debug.Log("Spider Attack: Player escaped");
                 _spiderController.PerformTransition(Transition.PlayerEscaped);
                 return;
             }
@@ -61,6 +58,15 @@ namespace Assets.Scripts.Spider.States
         public override void DoBeforeExit()
         {
             _animator.SetBool("isAttacking", false);
+        }
+
+        public override void OnCollisionExit2D(Collision2D other)
+        {
+            if (other.gameObject.tag == "Player")
+            {
+                Debug.Log("Spider Attack: The Player has escaped!");
+                _spiderController.PerformTransition(Transition.PlayerEscaped);
+            }
         }
 
         private void DamagePlayer(GameObject player)

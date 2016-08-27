@@ -41,17 +41,17 @@ class SpiderRoamState : State
 
     public override void Reason(GameObject self, GameObject player)
     {
-        if (_controller.CanSensePlayer())
+        if (_controller.CheckIfPlayerIsVisible())
         {
-            Debug.Log("Spider: I can sense the player");
-            _controller.PerformTransition(Transition.CanSensePlayer);
+            Debug.Log("Spider Roam: I can see the player");
+            _controller.PerformTransition(Transition.PlayerSighted);
             return;
         }
 
-        if (_controller.CheckIfPlayerIsVisible())
+        if (_controller.CanSensePlayer())
         {
-            Debug.Log("Spider: I can see the player");
-            _controller.PerformTransition(Transition.PlayerSighted);
+            Debug.Log("Spider Roam: I can sense the player");
+            _controller.PerformTransition(Transition.CanSensePlayer);
             return;
         }
     }

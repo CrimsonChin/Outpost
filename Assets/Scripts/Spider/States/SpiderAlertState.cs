@@ -36,15 +36,17 @@ namespace Assets.Scripts.Spider.States
 
         public override void Reason(GameObject self, GameObject player)
         {
-            //if (_spiderController.CanSensePlayer())
-            //{
-            //    _spiderController.PerformTransition(Transition.CanSensePlayer);
-            //}
-
             if (_spiderController.CheckIfPlayerIsVisible())
             {
                 Debug.Log("Spider Alert: Player sighted");
                 _spiderController.PerformTransition(Transition.PlayerSighted);
+                return;
+            }
+
+            if (_spiderController.CanSensePlayer())
+            {
+                // we can sense the player, stay in this state as long as the player can be sensed
+                _totalTimeSpentLooking = TimeLooking;
                 return;
             }
 

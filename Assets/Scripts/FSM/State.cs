@@ -67,6 +67,10 @@ abstract class State
     {
     }
 
+    public virtual void OnCollisionEnter2D(Collision2D other) { }
+
+    public virtual void OnCollisionExit2D(Collision2D other) { }
+
     #endregion
 
     #region Abstract Methods 

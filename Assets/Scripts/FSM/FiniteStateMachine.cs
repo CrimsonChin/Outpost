@@ -5,6 +5,7 @@ class FiniteStateMachine
 {
     #region Fields
 
+    // TODO use a dictionary
     private readonly IList<State> _states;
 
     #endregion

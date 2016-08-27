@@ -11,8 +11,7 @@ public class SpiderController : MonoBehaviour
     public GameObject Player;
 
     public float Speed = 0.002f;
-    public float SenseRadius = 0.75f;
-    public float AttackRadius = 0.3f;
+    public float SenseRadius = 1f;
     public float ViewRadius = 0.5f;
 
     private FiniteStateMachine _fsm;
@@ -58,22 +57,18 @@ public class SpiderController : MonoBehaviour
     {
         var roam = new SpiderRoamState(this);
         var alert = new SpiderAlertState(this);
-        //var attack = new SpiderAttackState(this, _animator);
+        var attack = new SpiderAttackState(this, _animator);
         var persue = new SpiderPersueState(this);
 
         _fsm = new FiniteStateMachine();
-        var states = new State[] { roam, persue, alert };
+        var states = new State[] { roam, persue, alert, attack };
         _fsm.AddStates(states);
     }
 
     public bool CanSensePlayer()
     {
-        return Vector2.Distance(transform.position, Player.transform.position) < SenseRadius;
-    }
-
-    public bool IsPlayerWithinAttackingDistance()
-    {
-        return Vector2.Distance(transform.position, Player.transform.position) < AttackRadius;
+        var distance = Vector2.Distance(transform.position, Player.transform.position);
+        return Math.Round(distance, 2) <= SenseRadius;
     }
 
     public void ChangeLookDirection()
@@ -93,7 +88,7 @@ public class SpiderController : MonoBehaviour
 
     public bool CheckIfPlayerIsVisible()
     {
-        Debug.DrawRay(transform.position, LookDirection * SightDistance, Color.red);
+        Debug.DrawRay(transform.position, LookDirection * (SightDistance + ViewRadius), Color.red);
         RaycastHit2D hit = Physics2D.CircleCast(transform.position, ViewRadius, LookDirection, SightDistance);
 
         return hit && hit.transform == Player.transform;
@@ -121,33 +116,22 @@ public class SpiderController : MonoBehaviour
         _fsm.PerformTransition(transition);
     }
 
-    //public void OnCollisionEnter2D(Collision2D other)
-    //{
-    //    if (other.gameObject.tag == "Player")
-    //    {
-    //        _animator.SetBool("isAttacking", true);
-    //        _fsm.PerformTransition(Transition.CollidedWithPlayer);
-    //    }
-    //}
+    public void OnCollisionEnter2D(Collision2D other)
+    {
+        _fsm.CurrentState.OnCollisionEnter2D(other);
+    }
 
-    //public void OnCollisionExit2D(Collision2D other)
-    //{
-    //    if (other.gameObject.tag == "Player")
-    //    {
-    //        _animator.SetBool("isAttacking", false);
-    //        _fsm.PerformTransition(Transition.PlayerEscaped);
-    //    }
-    //}
+    public void OnCollisionExit2D(Collision2D other)
+    {
+        _fsm.CurrentState.OnCollisionExit2D(other);
+    }
 
     public void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, SenseRadius); 
+        Gizmos.DrawWireSphere(transform.position, SenseRadius);
 
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, ViewRadius); 
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, AttackRadius); 
+        Gizmos.DrawWireSphere(transform.position, ViewRadius);
     }
 }
