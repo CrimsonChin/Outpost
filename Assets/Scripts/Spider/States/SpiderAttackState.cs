@@ -14,6 +14,7 @@ namespace Assets.Scripts.Spider.States
             _animator = animator;
 
             AddTransition(Transition.PlayerEscaped, StateId.Alert);
+            AddTransition(Transition.PlayerSighted, StateId.PersuePlayer);
         }
 
         public override StateId StateId
@@ -28,13 +29,19 @@ namespace Assets.Scripts.Spider.States
 
         public override void Reason(GameObject self, GameObject player)
         {
-            // its important to continue casting here otherwise oncollisionexit fires
+            if (!_spiderController.CanAttackPlayer())
+            {
+                SpiderLogger.Log("Spider Attack: Player no longer close enough to attack");
+                _spiderController.PerformTransition(Transition.PlayerEscaped);
+                return;
+            }
+
             if (_spiderController.CheckIfPlayerIsVisible())
             {
                 _spiderController.PerformTransition(Transition.PlayerEscaped);
+                return;
             }
 
-            // Edge case, player is dead? who knows
             if (player == null)
             {
                 _spiderController.PerformTransition(Transition.PlayerEscaped);
@@ -58,15 +65,6 @@ namespace Assets.Scripts.Spider.States
         public override void DoBeforeExit()
         {
             _animator.SetBool("isAttacking", false);
-        }
-
-        public override void OnCollisionExit2D(Collision2D other)
-        {
-            if (other.gameObject.tag == "Player")
-            {
-                Debug.Log("Spider Attack: The Player has escaped!");
-                _spiderController.PerformTransition(Transition.PlayerEscaped);
-            }
         }
 
         private void DamagePlayer(GameObject player)

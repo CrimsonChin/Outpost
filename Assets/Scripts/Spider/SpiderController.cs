@@ -3,42 +3,39 @@ using System.Collections.Generic;
 using Assets.Scripts.Spider.States;
 using UnityEngine;
 using UnityEngine.VR;
+using Assets.Scripts.Enums;
 
 public class SpiderController : MonoBehaviour
 {
     #region Fields
 
     public GameObject Player;
-
+    public float SightDistance = 2f;
     public float Speed = 0.002f;
     public float SenseRadius = 1f;
     public float ViewRadius = 0.5f;
+    public float AttackRadius = 0.25f;
 
-    private FiniteStateMachine _fsm;
+    private FiniteStateMachine _stateMachine;
     private Animator _animator;
-    private Vector2 _lookingDirection;
+    private Vector2 _facingDirection;
 
-    private const float SightDistance = 1.5f;
-
-    public Vector2 LookDirection
+    public Vector2 FacingDirection
     {
-        get { return _lookingDirection; }
+        get { return _facingDirection; }
         set
         {
-            _lookingDirection = value;
-            SetAnimator(_lookingDirection);
+            _facingDirection = value;
+            SetAnimator(_facingDirection);
         }
     }
 
     public Vector2 PlayerLastSightedLocation { get; set; }
 
-    public Color DebugColor { get; set; }
-
     #endregion
 
     public void Awake()
     {
-        DebugColor = Color.red;
     }
 
     public void Start()
@@ -49,8 +46,8 @@ public class SpiderController : MonoBehaviour
 
     public void Update()
     {
-        _fsm.CurrentState.Reason(gameObject, Player);
-        _fsm.CurrentState.Act(gameObject, Player);
+        _stateMachine.CurrentState.Reason(gameObject, Player);
+        _stateMachine.CurrentState.Act(gameObject, Player);
     }
 
     private void SetupStateMachine()
@@ -60,9 +57,9 @@ public class SpiderController : MonoBehaviour
         var attack = new SpiderAttackState(this, _animator);
         var persue = new SpiderPersueState(this);
 
-        _fsm = new FiniteStateMachine();
+        _stateMachine = new FiniteStateMachine();
         var states = new State[] { roam, persue, alert, attack };
-        _fsm.AddStates(states);
+        _stateMachine.AddStates(states);
     }
 
     public bool CanSensePlayer()
@@ -73,27 +70,98 @@ public class SpiderController : MonoBehaviour
 
     public void ChangeLookDirection()
     {
-        LookDirection = GetNewRandomDirection(LookDirection);
+        FacingDirection = GetNewRandomDirection(FacingDirection);
     }
 
-    private void SetAnimator(Vector2 vector2)
+    public void SetAnimator(Vector2 vector2)
     {
         if (_animator == null)
         {
             return;
         }
+
         _animator.SetFloat("inputX", vector2.x);
         _animator.SetFloat("inputY", vector2.y);
     }
 
     public bool CheckIfPlayerIsVisible()
     {
-        Debug.DrawRay(transform.position, LookDirection * (SightDistance + ViewRadius), Color.red);
-        RaycastHit2D hit = Physics2D.CircleCast(transform.position, ViewRadius, LookDirection, SightDistance);
+        var offset1 = 0.25f;
+        var offset2 = -0.25f;
 
-        return hit && hit.transform == Player.transform;
+        Vector3 ray1 = new Vector2(transform.position.x, transform.position.y);
+        Vector3 ray2 = new Vector2(transform.position.x, transform.position.y);
+
+        if (FacingDirection.x == 0)
+        {
+            ray1.x += offset1;
+            ray2.x += offset2;
+        }
+        else
+        {
+            ray1.y += offset1;
+            ray2.y += offset2;
+        }
+
+        var rayLength = FacingDirection * SightDistance;
+
+        //Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, 45) * FacingDirection) * (ViewRadius * 2), Color.red);
+        //Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, -45) * FacingDirection) * (ViewRadius * 2), Color.red);
+        Debug.DrawRay(transform.position, (FacingDirection * (SightDistance + 0.5f)), Color.red);
+        Debug.DrawRay(ray1, rayLength, Color.yellow);
+        Debug.DrawRay(ray2, rayLength, Color.blue);
+
+        int playerLayerMask = 1 << (int)Layer.Player;
+        var hit1 = Physics2D.Raycast(transform.position, FacingDirection, SightDistance + 0.5f, playerLayerMask);
+        var hit2 = Physics2D.Raycast(transform.position, FacingDirection, SightDistance, playerLayerMask);
+        var hit3 = Physics2D.Raycast(transform.position, FacingDirection, SightDistance, playerLayerMask);
+
+        if (hit1.transform != null)
+        {
+            PlayerLastSightedLocation = hit1.transform.position;
+            Debug.Log("HIT ONE");
+            return true;
+        }
+
+        if (hit2.transform != null)
+        {
+            Debug.Log("HIT TWO");
+            PlayerLastSightedLocation = hit2.transform.position;
+            return true;
+        }
+
+        if (hit3.transform != null)
+        {
+            Debug.Log("HIT THREE");
+            PlayerLastSightedLocation = hit3.transform.position;
+            return true;
+        }
+
+        //var offset2 = 1.5f;
+        //Debug.DrawRay(new Vector2(transform.position.x * offset2, transform.position.y), FacingDirection * (SightDistance + ViewRadius), Color.red);
+
+        //RaycastHit2D ray = Physics2D.Raycast(transform.position, LookDirection, SightDistance, 9);
+        //if (ray != null && ray.transform == Player.transform)
+        //{
+        //    Debug.Log("RAY HIT");
+        //}
+
+        // circle cast starts
+        //RaycastHit2D hit = Physics2D.CircleCast(transform.position, ViewRadius, FacingDirection, SightDistance);
+
+        //var hitPlayer = hit && hit.transform == Player.transform;
+        //if (hitPlayer)
+        //{
+        //    PlayerLastSightedLocation = hit.transform.position;
+        //}
+        return false;
     }
 
+    public bool CanAttackPlayer()
+    {
+        Collider2D col = Physics2D.OverlapCircle(transform.position, AttackRadius, 1 << (int)Layer.Player);
+        return (col != null && col.name == "Player");
+    }
 
     private Vector2 GetNewRandomDirection(Vector2 previousDirection)
     {
@@ -113,17 +181,17 @@ public class SpiderController : MonoBehaviour
 
     public void PerformTransition(Transition transition)
     {
-        _fsm.PerformTransition(transition);
+        _stateMachine.PerformTransition(transition);
     }
 
     public void OnCollisionEnter2D(Collision2D other)
     {
-        _fsm.CurrentState.OnCollisionEnter2D(other);
+        _stateMachine.CurrentState.OnCollisionEnter2D(other);
     }
 
     public void OnCollisionExit2D(Collision2D other)
     {
-        _fsm.CurrentState.OnCollisionExit2D(other);
+        _stateMachine.CurrentState.OnCollisionExit2D(other);
     }
 
     public void OnDrawGizmos()
@@ -131,7 +199,10 @@ public class SpiderController : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, SenseRadius);
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, ViewRadius);
+        //Gizmos.color = Color.yellow;
+        //Gizmos.DrawWireSphere(transform.position, ViewRadius);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, AttackRadius);
     }
 }

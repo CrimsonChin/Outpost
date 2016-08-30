@@ -13,7 +13,7 @@ namespace Assets.Scripts.Spider.States
             _spiderController = spiderController;
 
             AddTransition(Transition.PlayerEscaped, StateId.Alert);
-            AddTransition(Transition.CollidedWithPlayer, StateId.Attack);
+            AddTransition(Transition.Attack, StateId.Attack);
         }
 
         public override StateId StateId
@@ -23,11 +23,17 @@ namespace Assets.Scripts.Spider.States
 
         public override void Reason(GameObject self, GameObject player)
         {
-            if (Vector2.Distance(self.transform.position, _playerLastSightedLocation) <= 0)
+            if (Vector2.Distance(self.transform.position, _spiderController.PlayerLastSightedLocation) <= 0)
             {
-                Debug.Log("Spider Persue: The Player has escaped!");
+                SpiderLogger.Log("Spider Persue: The Player has escaped!");
                 _spiderController.PerformTransition(Transition.PlayerEscaped);
                 return;
+            }
+
+            if (_spiderController.CanAttackPlayer())
+            {
+                SpiderLogger.Log("Spider Persue: Close enough to attack player");
+                _spiderController.PerformTransition(Transition.Attack);
             }
         }
 
@@ -35,29 +41,29 @@ namespace Assets.Scripts.Spider.States
         {
             if (_spiderController.CheckIfPlayerIsVisible())
             {
-                _playerLastSightedLocation = player.transform.position;
+                _playerLastSightedLocation = _spiderController.PlayerLastSightedLocation;
             }
 
-            Vector2 distance = self.transform.position - _playerLastSightedLocation;
+            Vector2 distance = new Vector2(self.transform.position.x, self.transform.position.y) - _spiderController.PlayerLastSightedLocation;
             if (Mathf.Abs(distance.x) > Mathf.Abs(distance.y))
             {
-                _spiderController.LookDirection = distance.x > 0 ? Vector2.left : Vector2.right;
+                _spiderController.FacingDirection = distance.x > 0 ? Vector2.left : Vector2.right;
             }
             else
             {
-                _spiderController.LookDirection = distance.y > 0 ? Vector2.down : Vector2.up;
+                _spiderController.FacingDirection = distance.y > 0 ? Vector2.down : Vector2.up;
             }
 
-            self.transform.position = Vector3.MoveTowards(self.transform.position, _playerLastSightedLocation, PersueSpeed);
+            self.transform.position = Vector3.MoveTowards(self.transform.position, _spiderController.PlayerLastSightedLocation, PersueSpeed);
         }
 
-        public override void OnCollisionEnter2D(Collision2D other)
-        {
-            if (other.gameObject.tag == "Player")
-            {
-                Debug.Log("Spider Persue: Collided with player");
-                _spiderController.PerformTransition(Transition.CollidedWithPlayer);
-            }
-        }
+        //public override void OnCollisionEnter2D(Collision2D other)
+        //{
+        //    if (other.gameObject.tag == "Player")
+        //    {
+        //        SpiderLogger.Log("Spider Persue: Collided with player");
+        //        _spiderController.PerformTransition(Transition.CollidedWithPlayer);
+        //    }
+        //}
     }
 }

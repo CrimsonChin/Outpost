@@ -4,5 +4,5 @@
     CanSensePlayer,
     PlayerSighted,
     PlayerEscaped,
-    CollidedWithPlayer
+    Attack
 }

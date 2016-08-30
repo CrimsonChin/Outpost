@@ -38,12 +38,16 @@ public class Movement : MonoBehaviour
     private static Vector2 GetMovementVector()
     {
         var x = Input.GetAxisRaw("Horizontal");
-        if (Math.Abs(x) > 0)
-        {
-            return new Vector2(x, 0);
-        }
-
         var y = Input.GetAxisRaw("Vertical");
-        return Math.Abs(y) > 0 ? new Vector2(0, y) : Vector2.zero;
+        return new Vector2(x, y);
+
+        //var x = Input.GetAxisRaw("Horizontal");
+        //if (Math.Abs(x) > 0)
+        //{
+        //    return new Vector2(x, 0);
+        //}
+
+        //var y = Input.GetAxisRaw("Vertical");
+        //return Math.Abs(y) > 0 ? new Vector2(0, y) : Vector2.zero;
     }
 }

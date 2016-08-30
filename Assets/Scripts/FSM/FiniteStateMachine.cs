@@ -5,8 +5,7 @@ class FiniteStateMachine
 {
     #region Fields
 
-    // TODO use a dictionary
-    private readonly IList<State> _states;
+    private readonly IDictionary<StateId, State> _stateByStateId;
 
     #endregion
 
@@ -14,7 +13,7 @@ class FiniteStateMachine
 
     public FiniteStateMachine()
     {
-        _states = new List<State>();
+        _stateByStateId = new Dictionary<StateId, State>();
     }
 
     #endregion
@@ -37,29 +36,34 @@ class FiniteStateMachine
 
     public void AddState(State state)
     {
-        if (_states.Contains(state))
+        if (_stateByStateId.ContainsKey(state.StateId))
         {
             Debug.Log("State Machine already contains the state " + state.StateId);
             return;
         }
 
-        if (_states.Count == 0)
+        if (_stateByStateId.Count == 0)
         {
             CurrentState = state;
         }
 
-        _states.Add(state);
+        _stateByStateId.Add(state.StateId, state);
     }
 
-    public void DeleteState(State state)
+    public void RemoveState(State state)
     {
-        if (!_states.Contains(state))
+        RemoveState(state.StateId);
+    }
+
+    public void RemoveState(StateId stateId)
+    {
+        if (!_stateByStateId.ContainsKey(stateId))
         {
-            Debug.Log("State " + state.StateId + " not found.");
+            Debug.Log("State " + stateId + " not found.");
             return;
         }
 
-        _states.Remove(state);
+        _stateByStateId.Remove(stateId);
     }
 
     public void PerformTransition(Transition transition)
@@ -68,20 +72,19 @@ class FiniteStateMachine
         if (outputState == StateId.NullState)
         {
             Debug.Log("No output state found for transition " + transition + " on state " + CurrentState.StateId);
+            return;
         }
 
-        foreach (State state in _states)
+        State state;
+        if (!_stateByStateId.TryGetValue(outputState, out state))
         {
-            if (state.StateId == outputState)
-            {
-                CurrentState.DoBeforeExit();
-
-                CurrentState = state;
-
-                CurrentState.DoBeforeEnter();
-                break;
-            }
+            Debug.Log("State not found for state " + CurrentState.StateId);
+            return;
         }
+
+        CurrentState.DoBeforeExit();
+        CurrentState = state;
+        CurrentState.DoBeforeEnter();
     }
 
     #endregion

@@ -43,14 +43,14 @@ class SpiderRoamState : State
     {
         if (_controller.CheckIfPlayerIsVisible())
         {
-            Debug.Log("Spider Roam: I can see the player");
+            SpiderLogger.Log("Spider Roam: I can see the player");
             _controller.PerformTransition(Transition.PlayerSighted);
             return;
         }
 
         if (_controller.CanSensePlayer())
         {
-            Debug.Log("Spider Roam: I can sense the player");
+            SpiderLogger.Log("Spider Roam: I can sense the player");
             _controller.PerformTransition(Transition.CanSensePlayer);
             return;
         }
@@ -64,7 +64,7 @@ class SpiderRoamState : State
         // move
         _controller.ChangeLookDirection();
 
-        var hit = Physics2D.Raycast(self.transform.position, _controller.LookDirection);
+        var hit = Physics2D.Raycast(self.transform.position, _controller.FacingDirection);
 
         _roamTarget = hit.point;
     }

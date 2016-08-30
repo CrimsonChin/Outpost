@@ -3,38 +3,24 @@ using UnityEngine;
 
 abstract class State
 {
-    #region Fields
-
     protected IDictionary<Transition, StateId> _map;
-
-    #endregion
-
-    #region Ctor
 
     public State()
     {
         _map = new Dictionary<Transition, StateId>();
     }
 
-    #endregion
-
-    #region Members
-
     public abstract StateId StateId { get; }
 
-    #endregion
-
-    #region Methods
-
-    public void AddTransition(Transition transition, StateId state)
+    public void AddTransition(Transition transition, StateId stateId)
     {
         if (_map.ContainsKey(transition))
         {
-            Debug.Log("FSMState Error: State " + state + " already has transition " + transition);
+            Debug.Log("State Error: State " + stateId + " already has transition " + transition);
             return;
         }
 
-        _map.Add(transition, state);
+        _map.Add(transition, stateId);
     }
 
     public void RemoveTransiton(Transition transition)
@@ -55,29 +41,15 @@ abstract class State
         return StateId.NullState;
     }
 
-    #endregion
+    public virtual void DoBeforeEnter() { }
 
-    #region Virtual Methods
-
-    public virtual void DoBeforeEnter()
-    {
-    }
-
-    public virtual void DoBeforeExit()
-    {
-    }
+    public virtual void DoBeforeExit() { }
 
     public virtual void OnCollisionEnter2D(Collision2D other) { }
 
     public virtual void OnCollisionExit2D(Collision2D other) { }
 
-    #endregion
-
-    #region Abstract Methods 
-
     public abstract void Reason(GameObject self, GameObject player);
 
     public abstract void Act(GameObject self, GameObject player);
-
-    #endregion
 }

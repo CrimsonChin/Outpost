@@ -19,9 +19,7 @@ namespace Assets.Scripts.Spider.States
             AddTransition(Transition.CanSensePlayer, StateId.PersuePlayer);
             AddTransition(Transition.PlayerSighted, StateId.PersuePlayer);
             AddTransition(Transition.PlayerEscaped, StateId.Roam);
-
-            // set externally
-            AddTransition(Transition.CollidedWithPlayer, StateId.Attack);
+            AddTransition(Transition.Attack, StateId.Attack);
         }
 
         public override StateId StateId
@@ -36,9 +34,15 @@ namespace Assets.Scripts.Spider.States
 
         public override void Reason(GameObject self, GameObject player)
         {
+            if (_spiderController.CanAttackPlayer())
+            {
+                SpiderLogger.Log("Spider Alert: CAN ATTACK PLAYER !!!!!!!!");
+                _spiderController.PerformTransition(Transition.Attack);
+            }
+
             if (_spiderController.CheckIfPlayerIsVisible())
             {
-                Debug.Log("Spider Alert: Player sighted");
+                SpiderLogger.Log("Spider Alert: Player sighted");
                 _spiderController.PerformTransition(Transition.PlayerSighted);
                 return;
             }
@@ -46,14 +50,17 @@ namespace Assets.Scripts.Spider.States
             if (_spiderController.CanSensePlayer())
             {
                 // we can sense the player, stay in this state as long as the player can be sensed
-                _totalTimeSpentLooking = TimeLooking;
+                //_totalTimeSpentLooking = TimeLooking;
+                SpiderLogger.Log("Spider Alert: can sense the player");
+                _spiderController.PlayerLastSightedLocation = player.transform.position;
+                _spiderController.PerformTransition(Transition.CanSensePlayer);
                 return;
             }
 
             _totalTimeSpentLooking -= Time.deltaTime;
             if (_totalTimeSpentLooking <= 0)
             {
-                Debug.Log("Spider Alert: Player escaped");
+                SpiderLogger.Log("Spider Alert: Player escaped");
                 _spiderController.PerformTransition(Transition.PlayerEscaped);
             }
         }
