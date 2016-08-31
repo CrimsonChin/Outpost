@@ -86,8 +86,8 @@ public class SpiderController : MonoBehaviour
 
     public bool CheckIfPlayerIsVisible()
     {
-        var offset1 = 0.25f;
-        var offset2 = -0.25f;
+        const float offset1 = 0.25f;
+        const float offset2 = -0.25f;
 
         Vector3 ray1 = new Vector2(transform.position.x, transform.position.y);
         Vector3 ray2 = new Vector2(transform.position.x, transform.position.y);
@@ -105,16 +105,14 @@ public class SpiderController : MonoBehaviour
 
         var rayLength = FacingDirection * SightDistance;
 
-        //Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, 45) * FacingDirection) * (ViewRadius * 2), Color.red);
-        //Debug.DrawRay(transform.position, (Quaternion.Euler(0, 0, -45) * FacingDirection) * (ViewRadius * 2), Color.red);
-        Debug.DrawRay(transform.position, (FacingDirection * (SightDistance + 0.5f)), Color.red);
+        Debug.DrawRay(transform.position, FacingDirection * (SightDistance + 0.5f), Color.red);
         Debug.DrawRay(ray1, rayLength, Color.yellow);
         Debug.DrawRay(ray2, rayLength, Color.blue);
 
-        int playerLayerMask = 1 << (int)Layer.Player;
+        const int playerLayerMask = 1 << (int)Layer.Player;
         var hit1 = Physics2D.Raycast(transform.position, FacingDirection, SightDistance + 0.5f, playerLayerMask);
-        var hit2 = Physics2D.Raycast(transform.position, FacingDirection, SightDistance, playerLayerMask);
-        var hit3 = Physics2D.Raycast(transform.position, FacingDirection, SightDistance, playerLayerMask);
+        var hit2 = Physics2D.Raycast(ray1, FacingDirection, SightDistance, playerLayerMask);
+        var hit3 = Physics2D.Raycast(ray2, FacingDirection, SightDistance, playerLayerMask);
 
         if (hit1.transform != null)
         {
@@ -159,11 +157,11 @@ public class SpiderController : MonoBehaviour
 
     public bool CanAttackPlayer()
     {
-        Collider2D col = Physics2D.OverlapCircle(transform.position, AttackRadius, 1 << (int)Layer.Player);
-        return (col != null && col.name == "Player");
+        var col = Physics2D.OverlapCircle(transform.position, AttackRadius, 1 << (int)Layer.Player);
+        return col != null && col.name == "Player";
     }
 
-    private Vector2 GetNewRandomDirection(Vector2 previousDirection)
+    private static Vector2 GetNewRandomDirection(Vector2 removeDirection)
     {
         var tick = (int)DateTime.UtcNow.Ticks;
         var random = new System.Random(tick);
@@ -173,7 +171,7 @@ public class SpiderController : MonoBehaviour
             Vector2.up, Vector2.down, Vector2.left, Vector2.right
         };
 
-        possibleDirections.Remove(previousDirection);
+        possibleDirections.Remove(removeDirection);
 
         var randomIndex = random.Next(0, possibleDirections.Count);
         return possibleDirections[randomIndex];
