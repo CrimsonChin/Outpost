@@ -41,7 +41,7 @@ public class FireWeapon : MonoBehaviour
     {
         _hasWeaponEquipped = true;
 
-        // SET THE PROPERTIES THE WEAPON IS ABOUT TO BE DESTROYED
+        // SET THE PROPERTIES THE Loot Item IS ABOUT TO BE DESTROYED
         _weaponSpeed = weapon.Speed;
         _weaponPrefab = weapon.BulletPrefab;
         _weaponDamage = weapon.Damage;
